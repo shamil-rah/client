@@ -96,6 +96,7 @@ export const Content: React.FC = () => {
     : null;
 
   const handleMediaClick = (media: MediaContent) => {
+    // Directly show player with immediate playback readiness
     setSelectedMediaId(media.id);
   };
 
@@ -146,16 +147,17 @@ export const Content: React.FC = () => {
         </div>
 
         {/* Media Player */}
-        <Card className="overflow-hidden">
-          <div className="aspect-video bg-black flex items-center justify-center relative">
+        <div className="max-w-4xl mx-auto">
+          <Card className="overflow-hidden">
+            <div className="aspect-video bg-black flex items-center justify-center relative">
             <img 
               src={selectedMedia.thumbnail} 
               alt={selectedMedia.title}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <div className="w-20 h-20 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
-                <Play className="text-white ml-1" size={32} />
+              <div className="w-16 h-16 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors">
+                <Play className="text-white ml-1" size={24} />
               </div>
             </div>
             
@@ -175,13 +177,13 @@ export const Content: React.FC = () => {
                 </span>
               </div>
             )}
-          </div>
+            </div>
 
-          {/* Media Info */}
-          <div className="p-6 md:p-8">
+            {/* Media Info */}
+            <div className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 font-cinzel">
+                <h1 className="text-xl md:text-2xl font-bold text-white mb-2 font-cinzel">
                   {selectedMedia.title}
                 </h1>
                 <p className="text-gray-300 mb-4 leading-relaxed font-josefin">
@@ -214,8 +216,9 @@ export const Content: React.FC = () => {
                 Add to Favorites
               </Button>
             </div>
-          </div>
-        </Card>
+            </div>
+          </Card>
+        </div>
 
         {/* Related Content */}
         <div>

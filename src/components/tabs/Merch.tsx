@@ -4,11 +4,17 @@ import { Button } from '../ui/Button';
 import { ShoppingCart, Heart, Filter, Star, ChevronDown } from 'lucide-react';
 import { MerchItem, CartItem } from '../../types';
 
-export const Merch: React.FC = () => {
+interface MerchProps {
+  cart: CartItem[];
+  addToCart: (item: MerchItem, size?: string) => void;
+  onViewCart: () => void;
+}
+
+export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('alphabetically');
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<MerchItem | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>('');
 
   const categories = [
     { id: 'all', label: 'All Items' },
@@ -122,22 +128,6 @@ export const Merch: React.FC = () => {
     }
   });
 
-  const addToCart = (item: MerchItem, size?: string) => {
-    const existingItem = cart.find(cartItem => 
-      cartItem.item.id === item.id && cartItem.size === size
-    );
-
-    if (existingItem) {
-      setCart(cart.map(cartItem =>
-        cartItem.item.id === item.id && cartItem.size === size
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      ));
-    } else {
-      setCart([...cart, { id: Date.now().toString(), item, quantity: 1, size }]);
-    }
-  };
-
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
@@ -192,7 +182,10 @@ export const Merch: React.FC = () => {
         <div className="flex items-center space-x-4">
           <span className="filter-label">Sort by:</span>
           <span className="product-count">{sortedItems.length} PRODUCTS</span>
-          <button className="relative p-2 text-white hover:text-red-600 transition-colors">
+          <button 
+            onClick={onViewCart}
+            className="relative p-2 text-white hover:text-red-600 transition-colors"
+          >
             <ShoppingCart size={20} />
             {getTotalItems() > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -223,6 +216,7 @@ export const Merch: React.FC = () => {
               {/* Sizes (if applicable) */}
               {item.sizes && (
                 <div className="mb-4">
+                  <p className="text-white font-cinzel font-semibold mb-2">Size:</p>
                   <div className="flex flex-wrap gap-2">
                     {item.sizes.map((size) => (
                       <span key={size} className="px-3 py-1 border border-white/20 text-gray-300 text-sm font-josefin">
@@ -234,11 +228,11 @@ export const Merch: React.FC = () => {
               )}
 
               <button 
-                onClick={() => addToCart(item)}
+                onClick={() => setSelectedItem(item)}
                 className="add-to-cart-btn"
                 disabled={item.stock === 0}
               >
-                {item.stock === 0 ? 'Out of Stock' : 'Add to cart'}
+                {item.stock === 0 ? 'Out of Stock' : 'View Details'}
               </button>
             </div>
           </div>
@@ -252,7 +246,10 @@ export const Merch: React.FC = () => {
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h3 className="text-white font-cinzel font-semibold text-xl">{selectedItem.name}</h3>
               <button 
-                onClick={() => setSelectedItem(null)}
+                onClick={() => {
+                  setSelectedItem(null);
+                  setSelectedSize('');
+                }}
                 className="text-gray-400 hover:text-white transition-colors text-2xl"
               >
                 ×
@@ -279,29 +276,35 @@ export const Merch: React.FC = () => {
                   {selectedItem.sizes && (
                     <div className="mb-6">
                       <p className="text-white font-cinzel font-semibold mb-3">Select Size:</p>
-                      <div className="grid grid-cols-5 gap-2">
+                      <select
+                        value={selectedSize}
+                        onChange={(e) => setSelectedSize(e.target.value)}
+                        className="w-full bg-black border border-white/20 text-white p-3 rounded font-josefin focus:border-red-600 focus:outline-none"
+                      >
+                        <option value="">Choose a size</option>
                         {selectedItem.sizes.map((size) => (
-                          <button
-                            key={size}
-                            className="py-3 px-4 border border-white/20 hover:border-red-600 hover:bg-red-600/10 text-gray-300 hover:text-white rounded transition-colors font-josefin"
-                          >
-                            {size}
-                          </button>
+                          <option key={size} value={size}>{size}</option>
                         ))}
-                      </div>
+                      </select>
                     </div>
                   )}
 
                   <div className="flex space-x-4">
                     <Button 
                       onClick={() => {
-                        addToCart(selectedItem);
+                        addToCart(selectedItem, selectedSize || undefined);
                         setSelectedItem(null);
+                        setSelectedSize('');
                       }}
                       className="flex-1"
-                      disabled={selectedItem.stock === 0}
+                      disabled={selectedItem.stock === 0 || (selectedItem.sizes && !selectedSize)}
                     >
-                      Add to Cart
+                      {selectedItem.stock === 0 
+                        ? 'Out of Stock' 
+                        : selectedItem.sizes && !selectedSize 
+                        ? 'Select Size' 
+                        : 'Add to Cart'
+                      }
                     </Button>
                     <Button variant="secondary" className="px-8">
                       Buy Now

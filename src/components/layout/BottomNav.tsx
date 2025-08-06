@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Play, ShoppingBag, MessageCircle, User } from 'lucide-react';
+import { Home, Play, ShoppingBag, MessageCircle, User, ShoppingCart } from 'lucide-react';
 
 interface BottomNavProps {
   activeTab: string;
@@ -11,25 +11,26 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'content', icon: Play, label: 'Content' },
     { id: 'merch', icon: ShoppingBag, label: 'Merch' },
+    { id: 'cart', icon: ShoppingCart, label: 'Cart' },
     { id: 'community', icon: MessageCircle, label: 'Community' },
     { id: 'profile', icon: User, label: 'Profile' }
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-50">
-      <div className="flex justify-around items-center py-2 px-4 max-w-lg mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-50 overflow-x-auto">
+      <div className="flex justify-around items-center py-2 px-2 min-w-max">
         {tabs.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`flex flex-col items-center py-2 px-3 rounded transition-all duration-300 ${
+            className={`flex flex-col items-center py-2 px-2 rounded transition-all duration-300 min-w-0 ${
               activeTab === id
                 ? 'text-red-600 bg-white/5'
                 : 'text-gray-400 hover:text-gray-200'
             }`}
           >
             <Icon size={20} className="mb-1" />
-            <span className="text-xs font-medium font-josefin">{label}</span>
+            <span className="text-xs font-medium font-josefin whitespace-nowrap">{label}</span>
           </button>
         ))}
       </div>

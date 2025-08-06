@@ -5,7 +5,7 @@ import { Input } from '../ui/Input';
 import { User, Settings, Heart, ShoppingBag, Bell, LogOut, Star, Download } from 'lucide-react';
 
 export const Profile: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<'info' | 'collection' | 'settings'>('info');
+  const [activeSection, setActiveSection] = useState<'info' | 'purchase-history' | 'settings'>('info');
   const [isEditing, setIsEditing] = useState(false);
 
   const user = {
@@ -18,15 +18,11 @@ export const Profile: React.FC = () => {
     avatar: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg'
   };
 
-  const likedContent = [
-    { id: '1', title: 'Midnight Vibes', type: 'Beat', thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg' },
-    { id: '2', title: 'Fire Freestyle #12', type: 'Video', thumbnail: 'https://images.pexels.com/photos/164727/pexels-photo-164727.jpeg' },
-    { id: '3', title: 'Studio Session Raw', type: 'Video', thumbnail: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg' }
-  ];
-
   const purchasedItems = [
     { id: '1', name: 'Midnight Sessions Hoodie', price: 75, date: '2024-01-15', status: 'Delivered' },
-    { id: '2', name: 'Producer Pack Vol. 3', price: 35, date: '2024-01-10', status: 'Downloaded' }
+    { id: '2', name: 'Producer Pack Vol. 3', price: 35, date: '2024-01-10', status: 'Downloaded' },
+    { id: '3', name: 'Athletic Joggers (AOP)', price: 119.99, date: '2024-01-05', status: 'Delivered' },
+    { id: '4', name: 'Cashless Society Knit Beanie', price: 49.99, date: '2023-12-20', status: 'Delivered' }
   ];
 
   const notifications = [
@@ -93,7 +89,7 @@ export const Profile: React.FC = () => {
       <div className="flex space-x-1 bg-gray-800 rounded-lg p-1">
         {[
           { id: 'info', label: 'Info', icon: User },
-          { id: 'collection', label: 'Collection', icon: Heart },
+          { id: 'purchase-history', label: 'Purchases', icon: ShoppingBag },
           { id: 'settings', label: 'Settings', icon: Settings }
         ].map(({ id, label, icon: Icon }) => (
           <button
@@ -171,56 +167,76 @@ export const Profile: React.FC = () => {
         </div>
       )}
 
-      {/* Collection Section */}
-      {activeSection === 'collection' && (
-        <div className="space-y-6 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
-          {/* Liked Content */}
-          <div className="md:col-span-1">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Heart className="mr-2" size={20} />
-              Liked Content ({likedContent.length})
+      {/* Purchase History Section */}
+      {activeSection === 'purchase-history' && (
+        <div className="space-y-6">
+          <Card className="md:col-span-2">
+            <h3 className="text-xl font-semibold text-white mb-6 flex items-center font-cinzel">
+              <ShoppingBag className="mr-2" size={24} />
+              Purchase History ({purchasedItems.length} items)
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {likedContent.map((item) => (
-                <Card key={item.id} className="flex items-center space-x-3 p-4">
-                  <img 
-                    src={item.thumbnail} 
-                    alt={item.title}
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-white font-medium">{item.title}</h4>
-                    <p className="text-gray-400 text-sm">{item.type}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Purchase History */}
-          <div className="md:col-span-1">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <ShoppingBag className="mr-2" size={20} />
-              Purchase History
-            </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {purchasedItems.map((item) => (
-                <Card key={item.id} className="flex items-center justify-between p-4">
-                  <div>
-                    <h4 className="text-white font-medium">{item.name}</h4>
-                    <p className="text-gray-400 text-sm">
-                      ${item.price} • {item.date} • {item.status}
-                    </p>
+                <Card key={item.id} className="bg-gray-900/50 border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold font-cinzel mb-1">{item.name}</h4>
+                      <div className="flex items-center space-x-4 text-sm text-gray-400">
+                        <span className="font-josefin">${item.price} AUD</span>
+                        <span className="font-josefin">{item.date}</span>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold font-cinzel ${
+                          item.status === 'Delivered' 
+                            ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
+                            : 'bg-blue-600/20 text-blue-400 border border-blue-600/30'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {item.status === 'Downloaded' && (
+                        <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                          <Download size={16} />
+                          <span>Download</span>
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm">
+                        View Details
+                      </Button>
+                    </div>
                   </div>
-                  {item.status === 'Downloaded' && (
-                    <Button variant="ghost" size="sm">
-                      <Download size={16} />
-                    </Button>
-                  )}
                 </Card>
               ))}
             </div>
-          </div>
+            
+            {/* Purchase Summary */}
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <p className="text-2xl font-bold text-red-400 font-josefin">
+                    ${purchasedItems.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
+                  </p>
+                  <p className="text-gray-400 text-sm font-josefin">Total Spent</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-400 font-josefin">{purchasedItems.length}</p>
+                  <p className="text-gray-400 text-sm font-josefin">Items Purchased</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-400 font-josefin">
+                    {purchasedItems.filter(item => item.status === 'Delivered').length}
+                  </p>
+                  <p className="text-gray-400 text-sm font-josefin">Delivered</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-400 font-josefin">
+                    {purchasedItems.filter(item => item.status === 'Downloaded').length}
+                  </p>
+                  <p className="text-gray-400 text-sm font-josefin">Downloads</p>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       )}
 

@@ -5,14 +5,17 @@ import { BottomNav } from './components/layout/BottomNav';
 import { Home } from './components/tabs/Home';
 import { Content } from './components/tabs/Content';
 import { Merch } from './components/tabs/Merch';
+import { Cart } from './components/tabs/Cart';
 import { Community } from './components/tabs/Community';
 import { Profile } from './components/tabs/Profile';
+import { CartItem } from './types';
 
 type AppState = 'code-entry' | 'login' | 'main-app';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('code-entry');
   const [activeTab, setActiveTab] = useState('home');
+  const [cart, setCart] = useState<CartItem[]>([]);
 
 
   const handleCodeValidated = () => {
@@ -23,20 +26,57 @@ function App() {
     setAppState('main-app');
   };
 
+  const addToCart = (item: any, size?: string) => {
+    const existingItem = cart.find(cartItem => 
+      cartItem.item.id === item.id && cartItem.size === size
+    );
+
+    if (existingItem) {
+      setCart(cart.map(cartItem =>
+        cartItem.item.id === item.id && cartItem.size === size
+          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          : cartItem
+      ));
+    } else {
+      setCart([...cart, { id: Date.now().toString(), item, quantity: 1, size }]);
+    }
+  };
+
+  const updateCartQuantity = (id: string, quantity: number) => {
+    if (quantity === 0) {
+      setCart(cart.filter(item => item.id !== id));
+    } else {
+      setCart(cart.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      ));
+    }
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart(cart.filter(item => item.id !== id));
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <Home />;
+        return <Home onTabChange={setActiveTab} />;
       case 'content':
         return <Content />;
       case 'merch':
-        return <Merch />;
+        return <Merch cart={cart} addToCart={addToCart} onViewCart={() => setActiveTab('cart')} />;
+      case 'cart':
+        return <Cart 
+          cart={cart} 
+          updateQuantity={updateCartQuantity} 
+          removeFromCart={removeFromCart} 
+          onBackToMerch={() => setActiveTab('merch')} 
+        />;
       case 'community':
         return <Community />;
       case 'profile':
         return <Profile />;
       default:
-        return <Home />;
+        return <Home onTabChange={setActiveTab} />;
     }
   };
 
@@ -70,6 +110,7 @@ function App() {
             { id: 'home', label: 'Home' },
             { id: 'content', label: 'Content' },
             { id: 'merch', label: 'Merch' },
+            { id: 'cart', label: 'Cart' },
             { id: 'community', label: 'Community' },
             { id: 'profile', label: 'Profile' }
           ].map(({ id, label }) => (
@@ -83,6 +124,11 @@ function App() {
               }`}
             >
               <span className="font-medium">{label}</span>
+              {id === 'cart' && cart.length > 0 && (
+                <span className="ml-auto bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {cart.reduce((total, item) => total + item.quantity, 0)}
+                </span>
+              )}
             </button>
           ))}
         </nav>
