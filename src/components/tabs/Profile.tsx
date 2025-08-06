@@ -57,7 +57,7 @@ export const Profile: React.FC = () => {
           <img 
             src={user.avatar} 
             alt={user.username}
-            className="w-24 h-24 md:w-32 md:h-32 rounded-full mx-auto mb-4 object-cover border-4 border-blue-500"
+            className="w-24 h-24 md:w-32 md:h-32 rounded mx-auto mb-4 object-cover border-4 border-red-600"
           />
           <div className={`absolute top-0 right-1/2 transform translate-x-12 -translate-y-2 bg-gray-900 px-2 py-1 rounded-full border-2 border-gray-700 ${getFanLevelColor(user.fanLevel)}`}>
             <div className="flex items-center space-x-1">
@@ -99,9 +99,9 @@ export const Profile: React.FC = () => {
           <button
             key={id}
             onClick={() => setActiveSection(id as any)}
-            className={`flex-1 py-2 px-4 rounded-md transition-all duration-200 flex items-center justify-center space-x-2 ${
+            className={`flex-1 py-2 px-4 rounded transition-all duration-200 flex items-center justify-center space-x-2 ${
               activeSection === id
-                ? 'bg-blue-500 text-white'
+                ? 'bg-red-600 text-white'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -159,7 +159,7 @@ export const Profile: React.FC = () => {
               </div>
               <div className="w-full bg-gray-800 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(user.fanLevel / 10) * 100}%` }}
                 />
               </div>
@@ -235,8 +235,8 @@ export const Profile: React.FC = () => {
             </h3>
             <div className="space-y-3">
               {notifications.map((notif) => (
-                <div key={notif.id} className={`p-3 rounded-lg border ${
-                  notif.read ? 'bg-gray-800/50 border-gray-800' : 'bg-blue-500/10 border-blue-500/30'
+                <div key={notif.id} className={`p-3 rounded border ${
+                  notif.read ? 'bg-gray-800/50 border-gray-800' : 'bg-red-600/10 border-red-600/30'
                 }`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -245,7 +245,7 @@ export const Profile: React.FC = () => {
                       <span className="text-gray-500 text-xs">{notif.time}</span>
                     </div>
                     {!notif.read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
+                      <div className="w-2 h-2 bg-red-600 rounded-full flex-shrink-0 mt-2" />
                     )}
                   </div>
                 </div>
@@ -264,7 +264,7 @@ export const Profile: React.FC = () => {
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" defaultChecked />
-                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
+                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600" />
                 </label>
               </div>
               
@@ -275,7 +275,7 @@ export const Profile: React.FC = () => {
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
+                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600" />
                 </label>
               </div>
             </div>

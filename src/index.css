@@ -8,9 +8,7 @@
 
 /* Desktop layout adjustments */
 @media (min-width: 768px) {
-  body {
-    padding-left: 256px; /* Account for sidebar */
-  }
+  
 }
 
 * {
@@ -387,4 +385,10 @@ textarea:focus-visible {
   font-family: 'Josefin Sans', sans-serif;
   color: #9ca3af;
   font-size: 0.875rem;
+}
+/* in your global CSS (index.css or globals.css) */
+body {
+  margin: 0;
+  padding: 0;
+  background: black;
 }
