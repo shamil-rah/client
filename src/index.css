@@ -1,0 +1,390 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Josefin+Sans:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Gothic Fonts */
+
+
+/* Desktop layout adjustments */
+@media (min-width: 768px) {
+  body {
+    padding-left: 256px; /* Account for sidebar */
+  }
+}
+
+* {
+  font-family: 'Josefin Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Gothic heading font */
+h1, h2, h3, h4, h5, h6, .font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-josefin {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+  
+  .animation-delay-100 {
+    animation-delay: 0.1s;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 0.3s;
+  }
+
+  .noir-shadow {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  }
+
+  .noir-border {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .text-shadow-subtle {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .backdrop-blur-noir {
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar styles - Noir theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Hide scrollbar for mobile */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+button, input, textarea, select {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus styles for accessibility - Noir theme */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+/* Loading animation for buttons - Noir theme */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -8px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Backdrop blur support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-support {
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Noir card styles */
+.noir-card {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.noir-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+  transform: translateY(-2px);
+}
+
+/* Noir button styles */
+.btn-noir-primary {
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  color: white;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.btn-noir-primary:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+}
+
+.btn-noir-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+}
+
+.btn-noir-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-noir-ghost {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.btn-noir-ghost:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Noir input styles */
+.input-noir {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.input-noir:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  background: #000000;
+}
+
+/* Noir navigation styles */
+.nav-noir {
+  background: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Noir text effects */
+.text-noir-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.text-noir-accent {
+  color: #dc2626;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+}
+
+/* Noir modal/overlay styles */
+.modal-noir {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+}
+
+/* Noir progress bars */
+.progress-noir {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-noir-fill {
+  background: #dc2626;
+}
+
+/* Noir badge styles */
+.badge-noir {
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  color: white;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Product grid styles matching reference */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.product-card {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+}
+
+.product-image {
+  aspect-ratio: 1;
+  background: #111111;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.product-info {
+  padding: 1.5rem;
+}
+
+.product-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: white;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.product-price {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 600;
+  color: #dc2626;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.product-description {
+  font-family: 'Josefin Sans', sans-serif;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Filter and sort styles */
+.filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-label {
+  font-family: 'Cinzel', serif;
+  color: #dc2626;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.filter-select {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.product-count {
+  font-family: 'Josefin Sans', sans-serif;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
