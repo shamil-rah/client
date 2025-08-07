@@ -12,8 +12,14 @@ export const Content: React.FC = () => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string>('');
+  const [isDraggingProgress, setIsDraggingProgress] = useState(false);
+  const [isDraggingVolume, setIsDraggingVolume] = useState(false);
+  const [tempProgress, setTempProgress] = useState(0);
+  const [tempVolume, setTempVolume] = useState(0.7);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const volumeRef = useRef<HTMLDivElement>(null);
 
   // Array of sample audio URLs for random playback
   const audioUrls = [
@@ -52,28 +58,76 @@ export const Content: React.FC = () => {
     }
   };
 
-  // Handle progress bar click
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current || !duration) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const newTime = (clickX / rect.width) * duration;
-    
-    audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
+  // Handle progress bar interactions
+  const getProgressFromEvent = (e: MouseEvent | React.MouseEvent, element: HTMLDivElement) => {
+    const rect = element.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    return Math.max(0, Math.min(1, x / rect.width));
   };
 
-  // Handle volume bar click
-  const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current) return;
+  const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !duration || !progressRef.current) return;
     
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const newVolume = Math.max(0, Math.min(1, clickX / rect.width));
+    setIsDraggingProgress(true);
+    const progress = getProgressFromEvent(e, progressRef.current);
+    const newTime = progress * duration;
+    setTempProgress(progress);
     
-    audioRef.current.volume = newVolume;
-    setVolume(newVolume);
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!progressRef.current || !duration) return;
+      const progress = getProgressFromEvent(e, progressRef.current);
+      setTempProgress(progress);
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!audioRef.current || !progressRef.current || !duration) return;
+      const progress = getProgressFromEvent(e, progressRef.current);
+      const newTime = progress * duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+      setIsDraggingProgress(false);
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Handle volume bar interactions
+  const getVolumeFromEvent = (e: MouseEvent | React.MouseEvent, element: HTMLDivElement) => {
+    const rect = element.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    return Math.max(0, Math.min(1, x / rect.width));
+  };
+
+  const handleVolumeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !volumeRef.current) return;
+    
+    setIsDraggingVolume(true);
+    const newVolume = getVolumeFromEvent(e, volumeRef.current);
+    setTempVolume(newVolume);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!volumeRef.current) return;
+      const newVolume = getVolumeFromEvent(e, volumeRef.current);
+      setTempVolume(newVolume);
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!audioRef.current || !volumeRef.current) return;
+      const newVolume = getVolumeFromEvent(e, volumeRef.current);
+      audioRef.current.volume = newVolume;
+      setVolume(newVolume);
+      setIsDraggingVolume(false);
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   // Load new random audio
@@ -101,13 +155,21 @@ export const Content: React.FC = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleTimeUpdate = () => {
+      if (!isDraggingProgress) {
+        setCurrentTime(audio.currentTime);
+      }
+    };
     const handleLoadedMetadata = () => setDuration(audio.duration);
     const handleEnded = () => {
       setIsPlaying(false);
       loadRandomAudio(); // Load next random song
     };
-    const handleVolumeChange = () => setVolume(audio.volume);
+    const handleVolumeChange = () => {
+      if (!isDraggingVolume) {
+        setVolume(audio.volume);
+      }
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -120,7 +182,7 @@ export const Content: React.FC = () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('volumechange', handleVolumeChange);
     };
-  }, [currentAudioUrl]);
+  }, [currentAudioUrl, isDraggingProgress, isDraggingVolume]);
 
   // Set initial volume
   useEffect(() => {
@@ -354,16 +416,21 @@ export const Content: React.FC = () => {
                     
                     {/* Progress Bar */}
                     <div className="flex items-center space-x-3 text-sm text-gray-400 font-josefin">
-                      <span>{formatTime(currentTime)}</span>
+                      <span>{formatTime(isDraggingProgress ? tempProgress * duration : currentTime)}</span>
                       <div 
-                        className="flex-1 bg-gray-800 rounded-full h-1 relative cursor-pointer"
-                        onClick={handleProgressClick}
+                        ref={progressRef}
+                        className="flex-1 bg-gray-800 rounded-full h-2 relative cursor-pointer group"
+                        onMouseDown={handleProgressMouseDown}
                       >
                         <div 
-                          className="bg-red-600 h-1 rounded-full relative transition-all duration-100"
-                          style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                          className="bg-red-600 h-2 rounded-full relative transition-all duration-100"
+                          style={{ 
+                            width: duration 
+                              ? `${(isDraggingProgress ? tempProgress : (currentTime / duration)) * 100}%` 
+                              : '0%' 
+                          }}
                         >
-                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full opacity-0 hover:opacity-100 transition-opacity"></div>
+                          <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-lg transition-all duration-200 ${isDraggingProgress ? 'opacity-100 scale-125' : 'opacity-0 group-hover:opacity-100'}`}></div>
                         </div>
                       </div>
                       <span>{formatTime(duration)}</span>
@@ -423,7 +490,7 @@ export const Content: React.FC = () => {
                     <div className="flex items-center space-x-3">
                       <button 
                         onClick={() => {
-                          const newVolume = volume > 0 ? 0 : 0.7;
+                          const newVolume = (isDraggingVolume ? tempVolume : volume) > 0 ? 0 : 0.7;
                           if (audioRef.current) {
                             audioRef.current.volume = newVolume;
                           }
@@ -431,17 +498,18 @@ export const Content: React.FC = () => {
                         }}
                         className="text-gray-400 hover:text-white transition-colors"
                       >
-                        {volume > 0 ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                        {(isDraggingVolume ? tempVolume : volume) > 0 ? <Volume2 size={20} /> : <VolumeX size={20} />}
                       </button>
                       <div 
-                        className="flex-1 bg-gray-800 rounded-full h-1 relative cursor-pointer"
-                        onClick={handleVolumeClick}
+                        ref={volumeRef}
+                        className="flex-1 bg-gray-800 rounded-full h-2 relative cursor-pointer group"
+                        onMouseDown={handleVolumeMouseDown}
                       >
                         <div 
-                          className="bg-red-600 h-1 rounded-full relative transition-all duration-100"
-                          style={{ width: `${volume * 100}%` }}
+                          className="bg-red-600 h-2 rounded-full relative transition-all duration-100"
+                          style={{ width: `${(isDraggingVolume ? tempVolume : volume) * 100}%` }}
                         >
-                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full opacity-0 hover:opacity-100 transition-opacity"></div>
+                          <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-lg transition-all duration-200 ${isDraggingVolume ? 'opacity-100 scale-125' : 'opacity-0 group-hover:opacity-100'}`}></div>
                         </div>
                       </div>
                     </div>
