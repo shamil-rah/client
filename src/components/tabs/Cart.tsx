@@ -77,14 +77,14 @@ export const Cart: React.FC<CartProps> = ({
         <div className="md:col-span-2 space-y-4">
           {cart.map((cartItem) => (
             <Card key={cartItem.id} className="p-6">
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <img 
                   src={cartItem.item.images[0]} 
                   alt={cartItem.item.name}
-                  className="w-20 h-20 object-cover rounded"
+                  className="w-full h-32 sm:w-20 sm:h-20 object-cover rounded"
                 />
                 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h3 className="text-white font-semibold font-cinzel mb-1">
                     {cartItem.item.name}
                   </h3>
@@ -98,7 +98,8 @@ export const Cart: React.FC<CartProps> = ({
                   )}
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-between sm:justify-start sm:space-x-3">
+                  <div className="flex items-center space-x-3">
                   <button
                     onClick={() => updateQuantity(cartItem.id, Math.max(0, cartItem.quantity - 1))}
                     className="w-8 h-8 bg-gray-800 hover:bg-gray-700 rounded flex items-center justify-center text-white transition-colors"
@@ -116,9 +117,10 @@ export const Cart: React.FC<CartProps> = ({
                   >
                     <Plus size={16} />
                   </button>
-                </div>
 
-                <div className="text-right">
+                  </div>
+                  
+                  <div className="text-right sm:ml-4">
                   <p className="text-white font-semibold font-josefin">
                     ${(cartItem.item.price * cartItem.quantity).toFixed(2)} AUD
                   </p>
@@ -128,6 +130,7 @@ export const Cart: React.FC<CartProps> = ({
                   >
                     <Trash2 size={16} />
                   </button>
+                  </div>
                 </div>
               </div>
             </Card>

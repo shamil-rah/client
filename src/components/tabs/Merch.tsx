@@ -143,10 +143,11 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
 
       {/* Filter Section */}
       <div className="filter-section">
-        <div className="flex items-center space-x-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-8">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
             <span className="filter-label">Filter:</span>
-            <div className="flex space-x-4">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
               <div className="relative">
                 <select
                   value={selectedCategory}
@@ -177,27 +178,28 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <span className="filter-label">Sort by:</span>
-          <span className="product-count">{sortedItems.length} PRODUCTS</span>
-          <button 
-            onClick={onViewCart}
-            className="relative p-2 text-white hover:text-red-600 transition-colors"
-          >
-            <ShoppingCart size={20} />
-            {getTotalItems() > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {getTotalItems()}
-              </span>
-            )}
-          </button>
+          </div>
+          
+          <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+            <span className="filter-label hidden sm:inline">Sort by:</span>
+            <span className="product-count">{sortedItems.length} PRODUCTS</span>
+            <button 
+              onClick={onViewCart}
+              className="relative p-2 text-white hover:text-red-600 transition-colors self-start sm:self-auto"
+            >
+              <ShoppingCart size={20} />
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {getTotalItems()}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Product Grid */}
-      <div className="product-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {sortedItems.map((item) => (
           <div key={item.id} className="product-card">
             <div className="product-image">
@@ -217,7 +219,7 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
               {item.sizes && (
                 <div className="mb-4">
                   <p className="text-white font-cinzel font-semibold mb-2">Size:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2">
                     {item.sizes.map((size) => (
                       <span key={size} className="px-3 py-1 border border-white/20 text-gray-300 text-sm font-josefin">
                         {size}
@@ -241,8 +243,8 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
 
       {/* Product Detail Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl modal-noir rounded overflow-hidden">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-4xl modal-noir rounded overflow-hidden my-8">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h3 className="text-white font-cinzel font-semibold text-xl">{selectedItem.name}</h3>
               <button 
@@ -256,12 +258,12 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
               </button>
             </div>
             <div className="p-6">
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <div>
                   <img 
                     src={selectedItem.images[0]} 
                     alt={selectedItem.name}
-                    className="w-full aspect-square object-cover rounded"
+                    className="w-full h-64 sm:h-80 md:aspect-square object-cover rounded"
                   />
                 </div>
                 <div>
@@ -279,7 +281,7 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
                       <select
                         value={selectedSize}
                         onChange={(e) => setSelectedSize(e.target.value)}
-                        className="w-full bg-black border border-white/20 text-white p-3 rounded font-josefin focus:border-red-600 focus:outline-none"
+                        className="w-full bg-black border border-white/20 text-white p-2 md:p-3 rounded font-josefin focus:border-red-600 focus:outline-none"
                       >
                         <option value="">Choose a size</option>
                         {selectedItem.sizes.map((size) => (
@@ -289,14 +291,14 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
                     </div>
                   )}
 
-                  <div className="flex space-x-4">
+                  <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
                     <Button 
                       onClick={() => {
                         addToCart(selectedItem, selectedSize || undefined);
                         setSelectedItem(null);
                         setSelectedSize('');
                       }}
-                      className="flex-1"
+                      className="flex-1 w-full"
                       disabled={selectedItem.stock === 0 || (selectedItem.sizes && !selectedSize)}
                     >
                       {selectedItem.stock === 0 
@@ -306,7 +308,7 @@ export const Merch: React.FC<MerchProps> = ({ cart, addToCart, onViewCart }) => 
                         : 'Add to Cart'
                       }
                     </Button>
-                    <Button variant="secondary" className="px-8">
+                    <Button variant="secondary" className="px-6 md:px-8 w-full sm:w-auto">
                       Buy Now
                     </Button>
                   </div>

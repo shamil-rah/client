@@ -53,40 +53,40 @@ export const Profile: React.FC = () => {
           <img 
             src={user.avatar} 
             alt={user.username}
-            className="w-24 h-24 md:w-32 md:h-32 rounded mx-auto mb-4 object-cover border-4 border-red-600"
+            className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded mx-auto mb-4 object-cover border-4 border-red-600"
           />
-          <div className={`absolute top-0 right-1/2 transform translate-x-12 -translate-y-2 bg-gray-900 px-2 py-1 rounded-full border-2 border-gray-700 ${getFanLevelColor(user.fanLevel)}`}>
+          <div className={`absolute top-0 right-1/2 transform translate-x-8 sm:translate-x-10 md:translate-x-12 -translate-y-2 bg-gray-900 px-2 py-1 rounded-full border-2 border-gray-700 ${getFanLevelColor(user.fanLevel)}`}>
             <div className="flex items-center space-x-1">
-              <Star size={14} />
+              <Star size={12} className="sm:w-3.5 sm:h-3.5" />
               <span className="text-xs font-semibold">{user.fanLevel}</span>
             </div>
           </div>
         </div>
         
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">{user.username}</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 break-all">{user.username}</h1>
         <p className={`font-semibold mb-2 ${getFanLevelColor(user.fanLevel)}`}>
           {getFanLevelName(user.fanLevel)}
         </p>
-        <p className="text-gray-400 text-sm mb-4">Member since {user.joinDate}</p>
+        <p className="text-gray-400 text-xs sm:text-sm mb-4">Member since {user.joinDate}</p>
         
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
           <div>
-            <p className="text-2xl font-bold text-white">{user.totalLikes}</p>
-            <p className="text-gray-400 text-sm">Likes Given</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{user.totalLikes}</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Likes Given</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-white">{user.totalComments}</p>
-            <p className="text-gray-400 text-sm">Comments</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{user.totalComments}</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Comments</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-white">{user.fanLevel}</p>
-            <p className="text-gray-400 text-sm">Fan Level</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{user.fanLevel}</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Fan Level</p>
           </div>
         </div>
       </Card>
 
       {/* Section Navigation */}
-      <div className="flex space-x-1 bg-gray-800 rounded-lg p-1">
+      <div className="flex space-x-1 bg-gray-800 rounded-lg p-1 overflow-x-auto">
         {[
           { id: 'info', label: 'Info', icon: User },
           { id: 'purchase-history', label: 'Purchases', icon: ShoppingBag },
@@ -95,13 +95,13 @@ export const Profile: React.FC = () => {
           <button
             key={id}
             onClick={() => setActiveSection(id as any)}
-            className={`flex-1 py-2 px-4 rounded transition-all duration-200 flex items-center justify-center space-x-2 ${
+            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded transition-all duration-200 flex items-center justify-center space-x-1 sm:space-x-2 text-sm ${
               activeSection === id
                 ? 'bg-red-600 text-white'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            <Icon size={18} />
+            <Icon size={16} className="sm:w-4 sm:h-4" />
             <span>{label}</span>
           </button>
         ))}

@@ -75,8 +75,8 @@ export const Community: React.FC = () => {
           <div className="border-b border-white/10 pb-4 mb-4">
             <h3 className="text-white font-cinzel font-semibold">Share with the Community</h3>
           </div>
-          <div className="flex items-start space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-red-600 to-red-400 rounded flex items-center justify-center shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-red-600 to-red-400 rounded flex items-center justify-center shadow-lg flex-shrink-0 self-start">
               <span className="text-white font-semibold">U</span>
             </div>
             <div className="flex-1">
@@ -87,8 +87,8 @@ export const Community: React.FC = () => {
                 className="w-full bg-black border border-white/20 rounded p-4 text-white placeholder-gray-400 resize-none focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition-all duration-300 font-josefin"
                 rows={3}
               />
-              <div className="flex justify-between items-center mt-4">
-                <div className="flex space-x-3 text-gray-400">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 space-y-3 sm:space-y-0">
+                <div className="flex space-x-3 text-gray-400 justify-center sm:justify-start">
                   <button className="p-2 rounded hover:text-red-400 hover:bg-red-600/10 transition-all duration-300">
                     <Camera size={18} />
                   </button>
@@ -103,6 +103,7 @@ export const Community: React.FC = () => {
                   onClick={handleCreatePost}
                   disabled={!newPost.trim()}
                   size="sm"
+                  className="w-full sm:w-auto"
                 >
                   Post
                 </Button>

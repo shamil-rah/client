@@ -149,7 +149,7 @@ export const Content: React.FC = () => {
         {/* Media Player */}
         <div className="max-w-4xl mx-auto">
           <Card className="overflow-hidden">
-            <div className="aspect-video bg-black flex items-center justify-center relative">
+            <div className="aspect-video bg-black flex items-center justify-center relative w-full">
             <img 
               src={selectedMedia.thumbnail} 
               alt={selectedMedia.title}
@@ -157,7 +157,7 @@ export const Content: React.FC = () => {
             />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <div className="w-16 h-16 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors">
-                <Play className="text-white ml-1" size={24} />
+                <Play className="text-white ml-1" size={20} />
               </div>
             </div>
             
@@ -181,15 +181,15 @@ export const Content: React.FC = () => {
 
             {/* Media Info */}
             <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-2 sm:space-y-0">
               <div className="flex-1">
-                <h1 className="text-xl md:text-2xl font-bold text-white mb-2 font-cinzel">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 font-cinzel break-words">
                   {selectedMedia.title}
                 </h1>
-                <p className="text-gray-300 mb-4 leading-relaxed font-josefin">
+                <p className="text-gray-300 mb-4 leading-relaxed font-josefin text-sm sm:text-base">
                   {selectedMedia.description}
                 </p>
-                <div className="flex items-center space-x-6 text-gray-400 text-sm">
+                <div className="flex items-center space-x-4 sm:space-x-6 text-gray-400 text-sm">
                   <span className="flex items-center space-x-1">
                     <Eye size={16} />
                     <span>{selectedMedia.views.toLocaleString()} views</span>
@@ -203,16 +203,16 @@ export const Content: React.FC = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center space-x-4">
-              <Button className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <Button className="flex items-center justify-center space-x-2">
                 <Heart size={18} />
                 <span>Like</span>
               </Button>
-              <Button variant="secondary" className="flex items-center space-x-2">
+              <Button variant="secondary" className="flex items-center justify-center space-x-2">
                 <Share size={18} />
                 <span>Share</span>
               </Button>
-              <Button variant="ghost">
+              <Button variant="ghost" className="justify-center">
                 Add to Favorites
               </Button>
             </div>
@@ -222,8 +222,8 @@ export const Content: React.FC = () => {
 
         {/* Related Content */}
         <div>
-          <h2 className="text-xl font-bold text-white mb-4 font-cinzel">Related Content</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-4 font-cinzel px-2 sm:px-0">Related Content</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 px-2 sm:px-0">
             {content
               .filter(item => item.id !== selectedMedia.id && item.category === selectedMedia.category)
               .slice(0, 4)
@@ -237,20 +237,20 @@ export const Content: React.FC = () => {
                     <img 
                       src={item.thumbnail} 
                       alt={item.title}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-20 sm:h-24 md:h-32 object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     
                     {/* Play Button */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-10 h-10 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
-                        <Play className="text-white ml-0.5" size={16} />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
+                        <Play className="text-white ml-0.5" size={12} />
                       </div>
                     </div>
 
                     {/* Title */}
-                    <div className="absolute bottom-2 left-2 right-2">
-                      <h3 className="text-white font-semibold text-sm font-cinzel">{item.title}</h3>
+                    <div className="absolute bottom-1 left-1 right-1 sm:bottom-2 sm:left-2 sm:right-2">
+                      <h3 className="text-white font-semibold text-xs sm:text-sm font-cinzel truncate">{item.title}</h3>
                     </div>
                   </div>
                 </Card>
@@ -265,28 +265,28 @@ export const Content: React.FC = () => {
   return (
     <div className="space-y-6 pb-24 md:pb-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold text-white font-cinzel">Content Library</h1>
-        <button className="p-2 rounded bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+      <div className="flex items-center justify-between px-2 sm:px-0">
+        <h1 className="text-lg sm:text-xl md:text-3xl font-bold text-white font-cinzel truncate">Content Library</h1>
+        <button className="p-1.5 sm:p-2 rounded bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors flex-shrink-0 ml-2">
           <Filter size={20} />
         </button>
       </div>
 
       {/* Category Tabs */}
-      <div className="flex space-x-3 overflow-x-auto pb-2">
+      <div className="flex space-x-1 sm:space-x-2 md:space-x-3 overflow-x-auto pb-2 scrollbar-hide px-2 sm:px-0 -mx-2 sm:mx-0">
         {categories.map((category) => {
           const IconComponent = category.icon;
           return (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`flex-shrink-0 px-4 py-2 rounded transition-all duration-200 font-josefin flex items-center space-x-2 ${
+              className={`flex-shrink-0 px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded transition-all duration-200 font-josefin flex items-center space-x-1 md:space-x-2 text-xs sm:text-sm md:text-base whitespace-nowrap ${
                 selectedCategory === category.id
                   ? 'bg-red-600 text-white'
                   : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
               }`}
             >
-              <IconComponent size={16} />
+              <IconComponent size={12} className="sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
               <span>{category.label}</span>
             </button>
           );
@@ -294,34 +294,34 @@ export const Content: React.FC = () => {
       </div>
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6 px-2 sm:px-0">
         {filteredContent.map((item) => {
           const TypeIcon = getTypeIcon(item.type);
           return (
             <Card 
               key={item.id} 
-              className="p-0 overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="p-0 overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300 w-full"
               onClick={() => handleMediaClick(item)}
             >
               <div className="relative">
                 <img 
                   src={item.thumbnail} 
                   alt={item.title}
-                  className="w-full h-48 md:h-56 object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="w-full h-24 xs:h-28 sm:h-32 md:h-40 lg:h-48 object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
                 {/* Type Icon */}
-                <div className="absolute top-3 left-3">
-                  <div className={`inline-flex items-center justify-center w-8 h-8 rounded text-white text-sm ${getTypeColor(item.type)}`}>
-                    <TypeIcon size={16} />
+                <div className="absolute top-1 left-1 sm:top-2 sm:left-2 md:top-3 md:left-3">
+                  <div className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded text-white text-xs md:text-sm ${getTypeColor(item.type)}`}>
+                    <TypeIcon size={10} className="sm:w-3 sm:h-3 md:w-4 md:h-4" />
                   </div>
                 </div>
 
                 {/* New Badge */}
                 {item.isNew && (
-                  <div className="absolute top-3 right-3">
-                    <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold font-cinzel">
+                  <div className="absolute top-1 right-1 sm:top-2 sm:right-2 md:top-3 md:right-3">
+                    <span className="bg-red-600 text-white px-1 py-0.5 sm:px-1.5 md:px-2 md:py-1 rounded text-xs font-semibold font-cinzel">
                       NEW
                     </span>
                   </div>
@@ -329,23 +329,23 @@ export const Content: React.FC = () => {
 
                 {/* Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-16 h-16 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
-                    <Play className="text-white ml-1" size={24} />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
+                    <Play className="text-white ml-0.5 md:ml-1" size={12} />
                   </div>
                 </div>
 
                 {/* Bottom Info */}
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h3 className="text-white font-semibold mb-1 font-cinzel">{item.title}</h3>
-                  <div className="flex items-center justify-between text-gray-300 text-sm">
+                <div className="absolute bottom-1 left-1 right-1 sm:bottom-2 sm:left-2 sm:right-2 md:bottom-3 md:left-3 md:right-3">
+                  <h3 className="text-white font-semibold mb-0.5 sm:mb-1 font-cinzel text-xs sm:text-sm lg:text-base truncate leading-tight">{item.title}</h3>
+                  <div className="flex items-center justify-between text-gray-300 text-xs">
                     <div className="flex items-center space-x-3">
                       <span className="flex items-center space-x-1">
-                        <Eye size={14} />
-                        <span>{item.views.toLocaleString()}</span>
+                        <Eye size={10} className="sm:w-3 sm:h-3" />
+                        <span className="hidden xs:inline text-xs">{(item.views / 1000).toFixed(1)}k</span>
                       </span>
                       <span className="flex items-center space-x-1">
-                        <Heart size={14} />
-                        <span>{item.likes.toLocaleString()}</span>
+                        <Heart size={10} className="sm:w-3 sm:h-3" />
+                        <span className="hidden xs:inline text-xs">{(item.likes / 1000).toFixed(1)}k</span>
                       </span>
                     </div>
                   </div>
