@@ -148,36 +148,188 @@ export const Content: React.FC = () => {
 
         {/* Media Player */}
         <div className="max-w-4xl mx-auto">
-          <Card className="overflow-hidden">
-            <div className="aspect-video bg-black flex items-center justify-center relative w-full">
-            <img 
-              src={selectedMedia.thumbnail} 
-              alt={selectedMedia.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <div className="w-16 h-16 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors">
-                <Play className="text-white ml-1" size={20} />
-              </div>
-            </div>
-            
-            {/* Type Badge */}
-            <div className="absolute top-4 left-4">
-              <div className={`inline-flex items-center justify-center px-3 py-1 rounded text-white text-sm font-semibold font-cinzel ${getTypeColor(selectedMedia.type)}`}>
-                {React.createElement(getTypeIcon(selectedMedia.type), { size: 16, className: "mr-1" })}
-                {selectedMedia.type.toUpperCase()}
-              </div>
-            </div>
+          <Card className="overflow-hidden bg-gradient-to-br from-red-900/20 via-black to-black">
+            {selectedMedia.type === 'video' ? (
+              // Video Player
+              <div className="aspect-video bg-black relative">
+                <video 
+                  className="w-full h-full object-cover"
+                  controls
+                  autoPlay
+                  poster={selectedMedia.thumbnail}
+                >
+                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                
+                {/* Type Badge */}
+                <div className="absolute top-4 left-4">
+                  <div className="inline-flex items-center justify-center px-3 py-1 rounded bg-red-600/80 text-white text-sm font-semibold font-cinzel">
+                    <Video size={16} className="mr-1" />
+                    VIDEO
+                  </div>
+                </div>
 
-            {/* New Badge */}
-            {selectedMedia.isNew && (
-              <div className="absolute top-4 right-4">
-                <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold font-cinzel">
-                  NEW
-                </span>
+                {/* New Badge */}
+                {selectedMedia.isNew && (
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold font-cinzel">
+                      NEW
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : selectedMedia.type === 'audio' ? (
+              // Audio Player with Rotating Vinyl
+              <div className="bg-gradient-to-br from-red-900/10 to-black p-8">
+                <div className="flex flex-col items-center space-y-6">
+                  {/* Rotating Vinyl Record */}
+                  <div className="relative">
+                    <div className="w-64 h-64 rounded-full bg-gradient-to-br from-gray-900 via-black to-gray-800 border-4 border-gray-700 animate-spin-slow relative overflow-hidden">
+                      {/* Vinyl grooves */}
+                      <div className="absolute inset-4 rounded-full border border-gray-600 opacity-30"></div>
+                      <div className="absolute inset-8 rounded-full border border-gray-600 opacity-20"></div>
+                      <div className="absolute inset-12 rounded-full border border-gray-600 opacity-15"></div>
+                      <div className="absolute inset-16 rounded-full border border-gray-600 opacity-10"></div>
+                      
+                      {/* Center label */}
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-black rounded-full"></div>
+                      </div>
+                      
+                      {/* Album art in center */}
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full overflow-hidden border-2 border-red-600">
+                        <img 
+                          src={selectedMedia.thumbnail} 
+                          alt={selectedMedia.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Needle/Tonearm */}
+                    <div className="absolute -top-2 right-8 w-32 h-1 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full transform rotate-12 origin-right">
+                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full"></div>
+                    </div>
+                  </div>
+
+                  {/* Audio Element (hidden) */}
+                  <audio 
+                    autoPlay
+                    loop
+                    className="hidden"
+                  >
+                    <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" />
+                    <source src="https://www.soundjay.com/misc/sounds/bell-ringing-04.wav" type="audio/wav" />
+                    Your browser does not support the audio element.
+                  </audio>
+
+                  {/* Player Controls */}
+                  <div className="w-full max-w-md space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-white font-cinzel mb-1">{selectedMedia.title}</h3>
+                      <p className="text-red-400 font-josefin">Cashless Society</p>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="flex items-center space-x-3 text-sm text-gray-400">
+                      <span>2:27</span>
+                      <div className="flex-1 bg-gray-800 rounded-full h-1 relative">
+                        <div className="bg-red-600 h-1 rounded-full w-1/3 relative">
+                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full"></div>
+                        </div>
+                      </div>
+                      <span>6:34</span>
+                    </div>
+                    
+                    {/* Control Buttons */}
+                    <div className="flex items-center justify-center space-x-6">
+                      <button className="text-gray-400 hover:text-white transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                        </svg>
+                      </button>
+                      <button className="text-gray-400 hover:text-white transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                        </svg>
+                      </button>
+                      <button className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                      </button>
+                      <button className="text-gray-400 hover:text-white transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                        </svg>
+                      </button>
+                      <button className="text-gray-400 hover:text-white transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {/* Volume Control */}
+                    <div className="flex items-center space-x-3">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                      </svg>
+                      <div className="flex-1 bg-gray-800 rounded-full h-1 relative">
+                        <div className="bg-red-600 h-1 rounded-full w-2/3 relative">
+                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Type Badge */}
+                <div className="absolute top-4 left-4">
+                  <div className="inline-flex items-center justify-center px-3 py-1 rounded bg-gray-700/80 border border-red-600/30 text-white text-sm font-semibold font-cinzel">
+                    <Music size={16} className="mr-1" />
+                    AUDIO
+                  </div>
+                </div>
+
+                {/* New Badge */}
+                {selectedMedia.isNew && (
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold font-cinzel">
+                      NEW
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Image Display
+              <div className="aspect-video bg-black flex items-center justify-center relative w-full">
+                <img 
+                  src={selectedMedia.thumbnail} 
+                  alt={selectedMedia.title}
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Type Badge */}
+                <div className="absolute top-4 left-4">
+                  <div className="inline-flex items-center justify-center px-3 py-1 rounded bg-gray-700/80 text-white text-sm font-semibold font-cinzel">
+                    <ImageIcon size={16} className="mr-1" />
+                    IMAGE
+                  </div>
+                </div>
+
+                {/* New Badge */}
+                {selectedMedia.isNew && (
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold font-cinzel">
+                      NEW
+                    </span>
+                  </div>
+                )}
               </div>
             )}
-            </div>
 
             {/* Media Info */}
             <div className="p-6">

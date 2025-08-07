@@ -113,9 +113,9 @@ export const Home: React.FC<HomeProps> = ({ onTabChange }) => {
           <Sparkles className="mr-2" size={24} />
           BEHIND THE SCENES
         </h2>
-        <div className="flex space-x-4 overflow-x-auto pb-4 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
           {behindScenes.map((image, index) => (
-            <div key={index} className="flex-shrink-0 w-40 h-40 md:w-full md:h-48 rounded-xl overflow-hidden relative group cursor-pointer">
+            <div key={index} className="w-full h-40 md:h-48 rounded-xl overflow-hidden relative group cursor-pointer">
               <img 
                 src={image} 
                 alt={`Behind the veil ${index + 1}`}

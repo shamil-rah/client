@@ -3,14 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import Gothic Fonts */
-
-
-/* Desktop layout adjustments */
-@media (min-width: 768px) {
-  
-}
-
+/* Global reset */
 * {
   font-family: 'Josefin Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -28,15 +21,15 @@ h1, h2, h3, h4, h5, h6, .font-cinzel {
   .animate-fade-in {
     animation: fadeIn 0.8s ease-out forwards;
   }
-  
+
   .animation-delay-100 {
     animation-delay: 0.1s;
   }
-  
+
   .animation-delay-200 {
     animation-delay: 0.2s;
   }
-  
+
   .animation-delay-300 {
     animation-delay: 0.3s;
   }
@@ -94,7 +87,7 @@ h1, h2, h3, h4, h5, h6, .font-cinzel {
   ::-webkit-scrollbar {
     display: none;
   }
-  
+
   * {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -140,6 +133,17 @@ textarea:focus-visible {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Slow spinning animation for vinyl records */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
 }
 
 /* Backdrop blur support */
@@ -281,7 +285,7 @@ textarea:focus-visible {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* Product grid styles matching reference */
+/* Product grid styles */
 .product-card {
   background: #000000;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -328,6 +332,21 @@ textarea:focus-visible {
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-none {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
 }
 
 .add-to-cart-btn {
@@ -377,7 +396,8 @@ textarea:focus-visible {
   color: #9ca3af;
   font-size: 0.875rem;
 }
-/* in your global CSS (index.css or globals.css) */
+
+/* Global body styles */
 body {
   margin: 0;
   padding: 0;

@@ -18,12 +18,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-50 overflow-x-auto">
-      <div className="flex justify-around items-center py-2 px-2 min-w-max">
+      <div className="flex justify-around items-center py-2 px-1 min-w-max">
         {tabs.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`flex flex-col items-center py-2 px-2 rounded transition-all duration-300 min-w-0 ${
+            className={`flex flex-col items-center py-2 px-1 rounded transition-all duration-300 min-w-0 ${
               activeTab === id
                 ? 'text-red-600 bg-white/5'
                 : 'text-gray-400 hover:text-gray-200'
