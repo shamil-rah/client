@@ -1,12 +1,133 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { Play, Heart, Eye, Filter, ArrowLeft, Share, Headphones, Video, Image as ImageIcon, Flame, Music, Film, Mic, Palette } from 'lucide-react';
+import { Play, Pause, Heart, Eye, Filter, ArrowLeft, Share, Headphones, Video, Image as ImageIcon, Flame, Music, Film, Mic, Palette, Volume2, VolumeX, SkipBack, SkipForward } from 'lucide-react';
 import { MediaContent } from '../../types';
 
 export const Content: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string>('');
+  
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Array of sample audio URLs for random playback
+  const audioUrls = [
+    '/DJ Khaled ft. Drake - GREECE (Official Visualizer).mp3'
+  ];
+
+  // Select random audio URL
+  const selectRandomAudio = () => {
+    const randomIndex = Math.floor(Math.random() * audioUrls.length);
+    return audioUrls[randomIndex];
+  };
+
+  // Format time in mm:ss format
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return '0:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Handle play/pause toggle
+  const togglePlayPause = async () => {
+    if (!audioRef.current) return;
+
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      setIsPlaying(false);
+    }
+  };
+
+  // Handle progress bar click
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !duration) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const newTime = (clickX / rect.width) * duration;
+    
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  // Handle volume bar click
+  const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const newVolume = Math.max(0, Math.min(1, clickX / rect.width));
+    
+    audioRef.current.volume = newVolume;
+    setVolume(newVolume);
+  };
+
+  // Load new random audio
+  const loadRandomAudio = () => {
+    const newAudioUrl = selectRandomAudio();
+    setCurrentAudioUrl(newAudioUrl);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+  };
+
+  // Initialize audio when media is selected
+  useEffect(() => {
+    const selectedMedia = selectedMediaId 
+      ? content.find(item => item.id === selectedMediaId) 
+      : null;
+    
+    if (selectedMedia && selectedMedia.type === 'audio') {
+      loadRandomAudio();
+    }
+  }, [selectedMediaId]);
+
+  // Handle audio events
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      loadRandomAudio(); // Load next random song
+    };
+    const handleVolumeChange = () => setVolume(audio.volume);
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('volumechange', handleVolumeChange);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('volumechange', handleVolumeChange);
+    };
+  }, [currentAudioUrl]);
+
+  // Set initial volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, []);
 
   const categories = [
     { id: 'all', label: 'All', icon: Flame },
@@ -186,7 +307,7 @@ export const Content: React.FC = () => {
                 <div className="flex flex-col items-center space-y-6">
                   {/* Rotating Vinyl Record */}
                   <div className="relative">
-                    <div className="w-64 h-64 rounded-full bg-gradient-to-br from-gray-900 via-black to-gray-800 border-4 border-gray-700 animate-spin-slow relative overflow-hidden">
+                    <div className={`w-64 h-64 rounded-full bg-gradient-to-br from-gray-900 via-black to-gray-800 border-4 border-gray-700 relative overflow-hidden ${isPlaying ? 'animate-spin-slow' : ''}`}>
                       {/* Vinyl grooves */}
                       <div className="absolute inset-4 rounded-full border border-gray-600 opacity-30"></div>
                       <div className="absolute inset-8 rounded-full border border-gray-600 opacity-20"></div>
@@ -215,13 +336,12 @@ export const Content: React.FC = () => {
                   </div>
 
                   {/* Audio Element (hidden) */}
-                  <audio 
-                    autoPlay
-                    loop
+                  <audio
+                    ref={audioRef}
+                    src={currentAudioUrl}
                     className="hidden"
+                    preload="metadata"
                   >
-                    <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" />
-                    <source src="https://www.soundjay.com/misc/sounds/bell-ringing-04.wav" type="audio/wav" />
                     Your browser does not support the audio element.
                   </audio>
 
@@ -233,53 +353,95 @@ export const Content: React.FC = () => {
                     </div>
                     
                     {/* Progress Bar */}
-                    <div className="flex items-center space-x-3 text-sm text-gray-400">
-                      <span>2:27</span>
-                      <div className="flex-1 bg-gray-800 rounded-full h-1 relative">
-                        <div className="bg-red-600 h-1 rounded-full w-1/3 relative">
-                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full"></div>
+                    <div className="flex items-center space-x-3 text-sm text-gray-400 font-josefin">
+                      <span>{formatTime(currentTime)}</span>
+                      <div 
+                        className="flex-1 bg-gray-800 rounded-full h-1 relative cursor-pointer"
+                        onClick={handleProgressClick}
+                      >
+                        <div 
+                          className="bg-red-600 h-1 rounded-full relative transition-all duration-100"
+                          style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                        >
+                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full opacity-0 hover:opacity-100 transition-opacity"></div>
                         </div>
                       </div>
-                      <span>6:34</span>
+                      <span>{formatTime(duration)}</span>
                     </div>
                     
                     {/* Control Buttons */}
                     <div className="flex items-center justify-center space-x-6">
-                      <button className="text-gray-400 hover:text-white transition-colors">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-                        </svg>
+                      <button 
+                        onClick={loadRandomAudio}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        <SkipBack size={20} />
                       </button>
-                      <button className="text-gray-400 hover:text-white transition-colors">
+                      <button 
+                        onClick={() => {
+                          if (audioRef.current) {
+                            audioRef.current.currentTime = Math.max(0, currentTime - 10);
+                          }
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                          <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
                         </svg>
                       </button>
-                      <button className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                        </svg>
+                      <button 
+                        onClick={togglePlayPause}
+                        className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                      >
+                        {isPlaying ? (
+                          <Pause size={24} fill="white" />
+                        ) : (
+                          <Play size={24} fill="white" className="ml-1" />
+                        )}
                       </button>
-                      <button className="text-gray-400 hover:text-white transition-colors">
+                      <button 
+                        onClick={() => {
+                          if (audioRef.current) {
+                            audioRef.current.currentTime = Math.min(duration, currentTime + 10);
+                          }
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                          <path d="M13 6v12l8.5-6L13 6zM4 18l8.5-6L4 6v12z"/>
                         </svg>
                       </button>
-                      <button className="text-gray-400 hover:text-white transition-colors">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-                        </svg>
+                      <button 
+                        onClick={loadRandomAudio}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        <SkipForward size={20} />
                       </button>
                     </div>
                     
                     {/* Volume Control */}
                     <div className="flex items-center space-x-3">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400">
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                      </svg>
-                      <div className="flex-1 bg-gray-800 rounded-full h-1 relative">
-                        <div className="bg-red-600 h-1 rounded-full w-2/3 relative">
-                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full"></div>
+                      <button 
+                        onClick={() => {
+                          const newVolume = volume > 0 ? 0 : 0.7;
+                          if (audioRef.current) {
+                            audioRef.current.volume = newVolume;
+                          }
+                          setVolume(newVolume);
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        {volume > 0 ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                      </button>
+                      <div 
+                        className="flex-1 bg-gray-800 rounded-full h-1 relative cursor-pointer"
+                        onClick={handleVolumeClick}
+                      >
+                        <div 
+                          className="bg-red-600 h-1 rounded-full relative transition-all duration-100"
+                          style={{ width: `${volume * 100}%` }}
+                        >
+                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full opacity-0 hover:opacity-100 transition-opacity"></div>
                         </div>
                       </div>
                     </div>
@@ -395,7 +557,7 @@ export const Content: React.FC = () => {
                     
                     {/* Play Button */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-600/80 backdrop-blur-sm rounded-full flex items-center justify-center">
                         <Play className="text-white ml-0.5" size={12} />
                       </div>
                     </div>
@@ -481,7 +643,7 @@ export const Content: React.FC = () => {
 
                 {/* Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 bg-red-600/80 backdrop-blur-sm rounded flex items-center justify-center">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 bg-red-600/80 backdrop-blur-sm rounded-full flex items-center justify-center">
                     <Play className="text-white ml-0.5 md:ml-1" size={12} />
                   </div>
                 </div>
