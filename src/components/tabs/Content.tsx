@@ -36,6 +36,94 @@ export const Content: React.FC = () => {
   const videoVolumeRef = useRef<HTMLDivElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
 
+  const categories = [
+    { id: 'all', label: 'All', icon: Flame },
+    { id: 'beats', label: 'Beats', icon: Headphones },
+    { id: 'behind-scenes', label: 'Behind the Scenes', icon: Film },
+    { id: 'freestyles', label: 'Freestyles', icon: Mic },
+    { id: 'visuals', label: 'Visuals', icon: Palette }
+  ];
+
+  const content: MediaContent[] = [
+   {
+      id: '1',
+      title: 'Midnight Vibes',
+      type: 'audio',
+      thumbnail: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg',
+      url: '#',
+      category: 'beats',
+      likes: 1248,
+      views: 5432,
+      description: 'Dark atmospheric beat with haunting melodies and crushing 808s. Perfect for late night sessions.',
+      isNew: true
+    },
+    {
+      id: '2',
+      title: 'Studio Session Raw',
+      type: 'video',
+      thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
+      url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      category: 'behind-scenes',
+      likes: 892,
+      views: 3210,
+      description: 'Exclusive behind-the-scenes footage from our latest recording session. See the creative process unfold.'
+    },
+    {
+      id: '3',
+      title: 'Fire Freestyle #12',
+      type: 'video',
+      thumbnail: 'https://images.pexels.com/photos/164727/pexels-photo-164727.jpeg',
+      url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      category: 'freestyles',
+      likes: 2156,
+      views: 8743,
+      description: 'Raw freestyle session over dark instrumentals. Pure energy and lyrical prowess on display.',
+      isNew: true
+    },
+    {
+      id: '4',
+      title: 'Abstract Waves',
+      type: 'image',
+      thumbnail: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg',
+      url: '#',
+      category: 'visuals',
+      likes: 634,
+      views: 1890,
+      description: 'Digital artwork exploring the intersection of sound and visual art. Part of our visual album series.'
+    },
+    {
+      id: '5',
+      title: 'Dark Ritual Beat',
+      type: 'audio',
+      thumbnail: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg',
+      url: '#',
+      category: 'beats',
+      likes: 1567,
+      views: 4321,
+      description: 'Ceremonial dark beat with ritualistic elements and deep bass frequencies.'
+    },
+    {
+      id: '6',
+      title: 'Sanctum Tour',
+      type: 'video',
+      thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
+      url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      category: 'behind-scenes',
+      likes: 2341,
+      views: 7890,
+      description: 'Take a tour through the creative sanctum where all the magic happens.'
+    }
+
+  ];
+
+  const filteredContent = selectedCategory === 'all' 
+    ? content 
+    : content.filter(item => item.category === selectedCategory);
+
+  const selectedMedia = selectedMediaId 
+    ? content.find(item => item.id === selectedMediaId) 
+    : null;
+
   // Array of sample audio URLs for random playback
   const audioUrls = [
     '/DJ Khaled ft. Drake - GREECE (Official Visualizer).mp3'
@@ -329,14 +417,28 @@ export const Content: React.FC = () => {
   // Handle video events
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !selectedMedia || selectedMedia.type !== 'video') return;
 
     const handleVideoTimeUpdate = () => {
       if (!isDraggingVideoProgress) {
         setVideoCurrentTime(video.currentTime);
       }
     };
-    const handleVideoLoadedMetadata = () => setVideoDuration(video.duration);
+    const handleVideoLoadedMetadata = () => {
+      if (video.duration && !isNaN(video.duration) && isFinite(video.duration)) {
+        setVideoDuration(video.duration);
+      }
+    };
+    const handleVideoLoadedData = () => {
+      if (video.duration && !isNaN(video.duration) && isFinite(video.duration)) {
+        setVideoDuration(video.duration);
+      }
+    };
+    const handleVideoDurationChange = () => {
+      if (video.duration && !isNaN(video.duration) && isFinite(video.duration)) {
+        setVideoDuration(video.duration);
+      }
+    };
     const handleVideoEnded = () => setIsVideoPlaying(false);
     const handleVideoVolumeChange = () => {
       if (!isDraggingVideoVolume) {
@@ -348,6 +450,8 @@ export const Content: React.FC = () => {
 
     video.addEventListener('timeupdate', handleVideoTimeUpdate);
     video.addEventListener('loadedmetadata', handleVideoLoadedMetadata);
+    video.addEventListener('loadeddata', handleVideoLoadedData);
+    video.addEventListener('durationchange', handleVideoDurationChange);
     video.addEventListener('ended', handleVideoEnded);
     video.addEventListener('volumechange', handleVideoVolumeChange);
     video.addEventListener('play', handleVideoPlay);
@@ -356,12 +460,23 @@ export const Content: React.FC = () => {
     return () => {
       video.removeEventListener('timeupdate', handleVideoTimeUpdate);
       video.removeEventListener('loadedmetadata', handleVideoLoadedMetadata);
+      video.removeEventListener('loadeddata', handleVideoLoadedData);
+      video.removeEventListener('durationchange', handleVideoDurationChange);
       video.removeEventListener('ended', handleVideoEnded);
       video.removeEventListener('volumechange', handleVideoVolumeChange);
       video.removeEventListener('play', handleVideoPlay);
       video.removeEventListener('pause', handleVideoPause);
     };
-  }, [isDraggingVideoProgress, isDraggingVideoVolume]);
+  }, [isDraggingVideoProgress, isDraggingVideoVolume, selectedMedia]);
+
+  // Reset video state when media changes
+  useEffect(() => {
+    if (selectedMedia && selectedMedia.type === 'video') {
+      setVideoCurrentTime(0);
+      setVideoDuration(0);
+      setIsVideoPlaying(false);
+    }
+  }, [selectedMedia?.id]);
 
   // Set initial video volume
   useEffect(() => {
@@ -379,60 +494,6 @@ export const Content: React.FC = () => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
-
-  const categories = [
-    { id: 'all', label: 'All', icon: Flame },
-    { id: 'beats', label: 'Beats', icon: Headphones },
-    { id: 'behind-scenes', label: 'Behind the Scenes', icon: Film },
-    { id: 'freestyles', label: 'Freestyles', icon: Mic },
-    { id: 'visuals', label: 'Visuals', icon: Palette }
-  ];
-
-  const content: MediaContent[] = [
-    {
-  id: '2',
-  title: 'Studio Session Raw',
-  type: 'video',
-  thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
-  url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', // <-- changed
-  category: 'behind-scenes',
-  likes: 892,
-  views: 3210,
-  description: 'Exclusive behind-the-scenes footage from our latest recording session. See the creative process unfold.'
-},
-{
-  id: '3',
-  title: 'Fire Freestyle #12',
-  type: 'video',
-  thumbnail: 'https://images.pexels.com/photos/164727/pexels-photo-164727.jpeg',
-  url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', // <-- changed
-  category: 'freestyles',
-  likes: 2156,
-  views: 8743,
-  description: 'Raw freestyle session over dark instrumentals. Pure energy and lyrical prowess on display.',
-  isNew: true
-},
-{
-  id: '6',
-  title: 'Sanctum Tour',
-  type: 'video',
-  thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
-  url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', // <-- changed
-  category: 'behind-scenes',
-  likes: 2341,
-  views: 7890,
-  description: 'Take a tour through the creative sanctum where all the magic happens.'
-}
-
-  ];
-
-  const filteredContent = selectedCategory === 'all' 
-    ? content 
-    : content.filter(item => item.category === selectedCategory);
-
-  const selectedMedia = selectedMediaId 
-    ? content.find(item => item.id === selectedMediaId) 
-    : null;
 
   const handleMediaClick = (media: MediaContent) => {
     // Directly show player with immediate playback readiness
@@ -502,7 +563,7 @@ export const Content: React.FC = () => {
   poster={selectedMedia.thumbnail}
   onClick={toggleVideoPlayPause}
   onDoubleClick={toggleFullscreen}
-  preload="metadata"
+  preload="auto"
   crossOrigin="anonymous"
   src={selectedMedia.url} // <-- now it uses the URL from your content array
 >
