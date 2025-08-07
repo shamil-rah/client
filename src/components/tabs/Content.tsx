@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { Play, Pause, Heart, Eye, Filter, ArrowLeft, Share, Headphones, Video, Image as ImageIcon, Flame, Music, Film, Mic, Palette, Volume2, VolumeX, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, Heart, Eye, Filter, ArrowLeft, Share, Headphones, Video, Image as ImageIcon, Flame, Music, Film, Mic, Palette, Volume2, VolumeX, SkipBack, SkipForward, Maximize, Minimize } from 'lucide-react';
 import { MediaContent } from '../../types';
 
 export const Content: React.FC = () => {
@@ -16,10 +16,25 @@ export const Content: React.FC = () => {
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
   const [tempProgress, setTempProgress] = useState(0);
   const [tempVolume, setTempVolume] = useState(0.7);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoVolume, setVideoVolume] = useState(0.7);
+  const [isDraggingVideoProgress, setIsDraggingVideoProgress] = useState(false);
+  const [isDraggingVideoVolume, setIsDraggingVideoVolume] = useState(false);
+  const [tempVideoProgress, setTempVideoProgress] = useState(0);
+  const [tempVideoVolume, setTempVideoVolume] = useState(0.7);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showVideoControls, setShowVideoControls] = useState(true);
+  const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
+  const videoProgressRef = useRef<HTMLDivElement>(null);
+  const videoVolumeRef = useRef<HTMLDivElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
 
   // Array of sample audio URLs for random playback
   const audioUrls = [
@@ -58,6 +73,24 @@ export const Content: React.FC = () => {
     }
   };
 
+  // Handle video play/pause toggle
+  const toggleVideoPlayPause = async () => {
+    if (!videoRef.current) return;
+
+    try {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+        setIsVideoPlaying(false);
+      } else {
+        await videoRef.current.play();
+        setIsVideoPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error playing video:', error);
+      setIsVideoPlaying(false);
+    }
+  };
+
   // Handle progress bar interactions
   const getProgressFromEvent = (e: MouseEvent | React.MouseEvent, element: HTMLDivElement) => {
     const rect = element.getBoundingClientRect();
@@ -86,6 +119,37 @@ export const Content: React.FC = () => {
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
       setIsDraggingProgress(false);
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Handle video progress bar interactions
+  const handleVideoProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !videoDuration || !videoProgressRef.current) return;
+    
+    setIsDraggingVideoProgress(true);
+    const progress = getProgressFromEvent(e, videoProgressRef.current);
+    const newTime = progress * videoDuration;
+    setTempVideoProgress(progress);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!videoProgressRef.current || !videoDuration) return;
+      const progress = getProgressFromEvent(e, videoProgressRef.current);
+      setTempVideoProgress(progress);
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!videoRef.current || !videoProgressRef.current || !videoDuration) return;
+      const progress = getProgressFromEvent(e, videoProgressRef.current);
+      const newTime = progress * videoDuration;
+      videoRef.current.currentTime = newTime;
+      setVideoCurrentTime(newTime);
+      setIsDraggingVideoProgress(false);
       
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -128,6 +192,77 @@ export const Content: React.FC = () => {
     
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Handle video volume bar interactions
+  const handleVideoVolumeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !videoVolumeRef.current) return;
+    
+    setIsDraggingVideoVolume(true);
+    const newVolume = getVolumeFromEvent(e, videoVolumeRef.current);
+    setTempVideoVolume(newVolume);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!videoVolumeRef.current) return;
+      const newVolume = getVolumeFromEvent(e, videoVolumeRef.current);
+      setTempVideoVolume(newVolume);
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!videoRef.current || !videoVolumeRef.current) return;
+      const newVolume = getVolumeFromEvent(e, videoVolumeRef.current);
+      videoRef.current.volume = newVolume;
+      setVideoVolume(newVolume);
+      setIsDraggingVideoVolume(false);
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Handle fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!videoContainerRef.current) return;
+
+    if (!document.fullscreenElement) {
+      videoContainerRef.current.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(err => {
+        console.error('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      }).catch(err => {
+        console.error('Error attempting to exit fullscreen:', err);
+      });
+    }
+  };
+
+  // Handle video controls visibility
+  const showControls = () => {
+    setShowVideoControls(true);
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+    const timeout = setTimeout(() => {
+      if (isVideoPlaying) {
+        setShowVideoControls(false);
+      }
+    }, 3000);
+    setControlsTimeout(timeout);
+  };
+
+  const hideControls = () => {
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+    if (isVideoPlaying) {
+      setShowVideoControls(false);
+    }
   };
 
   // Load new random audio
@@ -191,6 +326,60 @@ export const Content: React.FC = () => {
     }
   }, []);
 
+  // Handle video events
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleVideoTimeUpdate = () => {
+      if (!isDraggingVideoProgress) {
+        setVideoCurrentTime(video.currentTime);
+      }
+    };
+    const handleVideoLoadedMetadata = () => setVideoDuration(video.duration);
+    const handleVideoEnded = () => setIsVideoPlaying(false);
+    const handleVideoVolumeChange = () => {
+      if (!isDraggingVideoVolume) {
+        setVideoVolume(video.volume);
+      }
+    };
+    const handleVideoPlay = () => setIsVideoPlaying(true);
+    const handleVideoPause = () => setIsVideoPlaying(false);
+
+    video.addEventListener('timeupdate', handleVideoTimeUpdate);
+    video.addEventListener('loadedmetadata', handleVideoLoadedMetadata);
+    video.addEventListener('ended', handleVideoEnded);
+    video.addEventListener('volumechange', handleVideoVolumeChange);
+    video.addEventListener('play', handleVideoPlay);
+    video.addEventListener('pause', handleVideoPause);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleVideoTimeUpdate);
+      video.removeEventListener('loadedmetadata', handleVideoLoadedMetadata);
+      video.removeEventListener('ended', handleVideoEnded);
+      video.removeEventListener('volumechange', handleVideoVolumeChange);
+      video.removeEventListener('play', handleVideoPlay);
+      video.removeEventListener('pause', handleVideoPause);
+    };
+  }, [isDraggingVideoProgress, isDraggingVideoVolume]);
+
+  // Set initial video volume
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = videoVolume;
+    }
+  }, []);
+
+  // Handle fullscreen change
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   const categories = [
     { id: 'all', label: 'All', icon: Flame },
     { id: 'beats', label: 'Beats', icon: Headphones },
@@ -201,73 +390,40 @@ export const Content: React.FC = () => {
 
   const content: MediaContent[] = [
     {
-      id: '1',
-      title: 'Midnight Vibes',
-      type: 'audio',
-      thumbnail: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg',
-      url: '#',
-      category: 'beats',
-      likes: 1248,
-      views: 5432,
-      description: 'Dark atmospheric beat with haunting melodies and crushing 808s. Perfect for late night sessions.',
-      isNew: true
-    },
-    {
-      id: '2',
-      title: 'Studio Session Raw',
-      type: 'video',
-      thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
-      url: '#',
-      category: 'behind-scenes',
-      likes: 892,
-      views: 3210,
-      description: 'Exclusive behind-the-scenes footage from our latest recording session. See the creative process unfold.'
-    },
-    {
-      id: '3',
-      title: 'Fire Freestyle #12',
-      type: 'video',
-      thumbnail: 'https://images.pexels.com/photos/164727/pexels-photo-164727.jpeg',
-      url: '#',
-      category: 'freestyles',
-      likes: 2156,
-      views: 8743,
-      description: 'Raw freestyle session over dark instrumentals. Pure energy and lyrical prowess on display.',
-      isNew: true
-    },
-    {
-      id: '4',
-      title: 'Abstract Waves',
-      type: 'image',
-      thumbnail: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg',
-      url: '#',
-      category: 'visuals',
-      likes: 634,
-      views: 1890,
-      description: 'Digital artwork exploring the intersection of sound and visual art. Part of our visual album series.'
-    },
-    {
-      id: '5',
-      title: 'Dark Ritual Beat',
-      type: 'audio',
-      thumbnail: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg',
-      url: '#',
-      category: 'beats',
-      likes: 1567,
-      views: 4321,
-      description: 'Ceremonial dark beat with ritualistic elements and deep bass frequencies.'
-    },
-    {
-      id: '6',
-      title: 'Sanctum Tour',
-      type: 'video',
-      thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
-      url: '#',
-      category: 'behind-scenes',
-      likes: 2341,
-      views: 7890,
-      description: 'Take a tour through the creative sanctum where all the magic happens.'
-    }
+  id: '2',
+  title: 'Studio Session Raw',
+  type: 'video',
+  thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
+  url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', // <-- changed
+  category: 'behind-scenes',
+  likes: 892,
+  views: 3210,
+  description: 'Exclusive behind-the-scenes footage from our latest recording session. See the creative process unfold.'
+},
+{
+  id: '3',
+  title: 'Fire Freestyle #12',
+  type: 'video',
+  thumbnail: 'https://images.pexels.com/photos/164727/pexels-photo-164727.jpeg',
+  url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', // <-- changed
+  category: 'freestyles',
+  likes: 2156,
+  views: 8743,
+  description: 'Raw freestyle session over dark instrumentals. Pure energy and lyrical prowess on display.',
+  isNew: true
+},
+{
+  id: '6',
+  title: 'Sanctum Tour',
+  type: 'video',
+  thumbnail: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg',
+  url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', // <-- changed
+  category: 'behind-scenes',
+  likes: 2341,
+  views: 7890,
+  description: 'Take a tour through the creative sanctum where all the magic happens.'
+}
+
   ];
 
   const filteredContent = selectedCategory === 'all' 
@@ -334,30 +490,164 @@ export const Content: React.FC = () => {
           <Card className="overflow-hidden bg-gradient-to-br from-red-900/20 via-black to-black">
             {selectedMedia.type === 'video' ? (
               // Video Player
-              <div className="aspect-video bg-black relative">
-                <video 
-                  className="w-full h-full object-cover"
-                  controls
-                  autoPlay
-                  poster={selectedMedia.thumbnail}
-                >
-                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+              <div 
+                ref={videoContainerRef}
+                className={`aspect-video bg-black relative overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50 aspect-auto' : ''}`}
+                onMouseMove={showControls}
+                onMouseLeave={hideControls}
+              >
+               <video
+  ref={videoRef}
+  className="w-full h-full object-cover cursor-pointer"
+  poster={selectedMedia.thumbnail}
+  onClick={toggleVideoPlayPause}
+  onDoubleClick={toggleFullscreen}
+  preload="metadata"
+  crossOrigin="anonymous"
+  src={selectedMedia.url} // <-- now it uses the URL from your content array
+>
+  Your browser does not support the video tag.
+</video>
+
+
+                
+                {/* Custom Video Controls */}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 transition-opacity duration-300 ${showVideoControls ? 'opacity-100' : 'opacity-0'}`}>
+                  {/* Top Controls */}
+                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="inline-flex items-center justify-center px-2 py-1 sm:px-3 rounded bg-red-600/80 text-white text-xs sm:text-sm font-semibold font-cinzel">
+                        <Video size={12} className="mr-1 sm:w-4 sm:h-4" />
+                        VIDEO
+                      </div>
+                      {selectedMedia.isNew && (
+                        <span className="bg-red-600 text-white px-2 py-1 sm:px-3 rounded text-xs sm:text-sm font-semibold font-cinzel">
+                          NEW
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-1.5 sm:p-2 rounded bg-black/50 text-white hover:bg-black/70 transition-colors"
+                    >
+                      {isFullscreen ? <Minimize size={16} className="sm:w-5 sm:h-5" /> : <Maximize size={16} className="sm:w-5 sm:h-5" />}
+                    </button>
+                  </div>
+
+                  {/* Center Play Button */}
+                  {!isVideoPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <button
+                        onClick={toggleVideoPlayPause}
+                        className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-red-600/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-300 transform hover:scale-110"
+                      >
+                        <Play size={16} fill="white" className="ml-0.5 sm:ml-1 sm:w-6 sm:h-6 md:w-8 md:h-8" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Bottom Controls */}
+                  <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3">
+                    {/* Progress Bar */}
+                    <div className="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm text-white">
+                      <span className="font-josefin text-xs sm:text-sm">{formatTime(isDraggingVideoProgress ? tempVideoProgress * videoDuration : videoCurrentTime)}</span>
+                      <div 
+                        ref={videoProgressRef}
+                        className="flex-1 bg-white/20 rounded-full h-1 sm:h-1.5 relative cursor-pointer group"
+                        onMouseDown={handleVideoProgressMouseDown}
+                      >
+                        <div 
+                          className="bg-red-600 h-1 sm:h-1.5 rounded-full relative transition-all duration-100"
+                          style={{ 
+                            width: videoDuration 
+                              ? `${(isDraggingVideoProgress ? tempVideoProgress : (videoCurrentTime / videoDuration)) * 100}%` 
+                              : '0%' 
+                          }}
+                        >
+                          <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-2 sm:w-3 sm:h-3 bg-red-600 rounded-full border border-white shadow-lg transition-all duration-200 ${isDraggingVideoProgress ? 'opacity-100 scale-125' : 'opacity-0 group-hover:opacity-100'}`}></div>
+                        </div>
+                      </div>
+                      <span className="font-josefin text-xs sm:text-sm">{formatTime(videoDuration)}</span>
+                    </div>
+                    
+                    {/* Control Buttons */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+                        <button 
+                          onClick={() => {
+                            if (videoRef.current) {
+                              videoRef.current.currentTime = Math.max(0, videoCurrentTime - 10);
+                            }
+                          }}
+                          className="text-white hover:text-red-400 transition-colors p-1 sm:p-0"
+                        >
+                          <SkipBack size={16} className="sm:w-5 sm:h-5" />
+                        </button>
+                        <button 
+                          onClick={toggleVideoPlayPause}
+                          className="w-8 h-8 sm:w-10 sm:h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                        >
+                          {isVideoPlaying ? (
+                            <Pause size={14} fill="white" className="sm:w-5 sm:h-5" />
+                          ) : (
+                            <Play size={14} fill="white" className="ml-0.5 sm:w-5 sm:h-5" />
+                          )}
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (videoRef.current) {
+                              videoRef.current.currentTime = Math.min(videoDuration, videoCurrentTime + 10);
+                            }
+                          }}
+                          className="text-white hover:text-red-400 transition-colors p-1 sm:p-0"
+                        >
+                          <SkipForward size={16} className="sm:w-5 sm:h-5" />
+                        </button>
+                      </div>
+                      
+                      {/* Volume Control */}
+                      <div className="flex items-center space-x-1 sm:space-x-2">
+                        <button 
+                          onClick={() => {
+                            const newVolume = (isDraggingVideoVolume ? tempVideoVolume : videoVolume) > 0 ? 0 : 0.7;
+                            if (videoRef.current) {
+                              videoRef.current.volume = newVolume;
+                            }
+                            setVideoVolume(newVolume);
+                          }}
+                          className="text-white hover:text-red-400 transition-colors p-1 sm:p-0"
+                        >
+                          {(isDraggingVideoVolume ? tempVideoVolume : videoVolume) > 0 ? <Volume2 size={16} className="sm:w-5 sm:h-5" /> : <VolumeX size={16} className="sm:w-5 sm:h-5" />}
+                        </button>
+                        <div 
+                          ref={videoVolumeRef}
+                          className="w-12 sm:w-16 md:w-20 bg-white/20 rounded-full h-1 sm:h-1.5 relative cursor-pointer group"
+                          onMouseDown={handleVideoVolumeMouseDown}
+                        >
+                          <div 
+                            className="bg-red-600 h-1 sm:h-1.5 rounded-full relative transition-all duration-100"
+                            style={{ width: `${(isDraggingVideoVolume ? tempVideoVolume : videoVolume) * 100}%` }}
+                          >
+                            <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-2 sm:w-3 sm:h-3 bg-red-600 rounded-full border border-white shadow-lg transition-all duration-200 ${isDraggingVideoVolume ? 'opacity-100 scale-125' : 'opacity-0 group-hover:opacity-100'}`}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Type Badge */}
-                <div className="absolute top-4 left-4">
-                  <div className="inline-flex items-center justify-center px-3 py-1 rounded bg-red-600/80 text-white text-sm font-semibold font-cinzel">
-                    <Video size={16} className="mr-1" />
+                <div className={`absolute top-4 left-4 transition-opacity duration-300 ${showVideoControls ? 'opacity-0' : 'opacity-100'}`}>
+                  <div className="inline-flex items-center justify-center px-2 py-1 sm:px-3 rounded bg-red-600/80 text-white text-xs sm:text-sm font-semibold font-cinzel">
+                    <Video size={12} className="mr-1 sm:w-4 sm:h-4" />
                     VIDEO
                   </div>
                 </div>
 
                 {/* New Badge */}
                 {selectedMedia.isNew && (
-                  <div className="absolute top-4 right-4">
-                    <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold font-cinzel">
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                    <span className="bg-red-600 text-white px-2 py-1 sm:px-3 rounded text-xs sm:text-sm font-semibold font-cinzel">
                       NEW
                     </span>
                   </div>
