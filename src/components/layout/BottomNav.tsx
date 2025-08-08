@@ -4,9 +4,10 @@ import { Home, Play, ShoppingBag, MessageCircle, User, ShoppingCart } from 'luci
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  labels?: { id: string; label: string }[];
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, labels }) => {
   const tabs = [
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'content', icon: Play, label: 'Content' },
@@ -16,10 +17,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     { id: 'profile', icon: User, label: 'Profile' }
   ];
 
+  const displayTabs = labels ? tabs.map(tab => ({
+    ...tab,
+    label: labels.find(l => l.id === tab.id)?.label || tab.label
+  })) : tabs;
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-50 overflow-x-auto">
       <div className="flex justify-around items-center py-2 px-1 min-w-max">
-        {tabs.map(({ id, icon: Icon, label }) => (
+        {displayTabs.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => onTabChange(id)}

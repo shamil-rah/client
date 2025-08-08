@@ -8,17 +8,23 @@ import { Merch } from './components/tabs/Merch';
 import { Cart } from './components/tabs/Cart';
 import { Community } from './components/tabs/Community';
 import { Profile } from './components/tabs/Profile';
+import { FunnelMarketplace } from './components/tabs/FunnelMarketplace';
+import { FunnelBids } from './components/tabs/FunnelBids';
 import { CartItem } from './types';
 
 type AppState = 'code-entry' | 'login' | 'main-app';
+type AppMode = 'music' | 'funnel';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('code-entry');
+  const [appMode, setAppMode] = useState<AppMode>('music');
   const [activeTab, setActiveTab] = useState('home');
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [enteredCode, setEnteredCode] = useState('');
 
-
-  const handleCodeValidated = () => {
+  const handleCodeValidated = (code: string) => {
+    setEnteredCode(code);
+    setAppMode(code === 'FUNNELMARKET2024' ? 'funnel' : 'music');
     setAppState('login');
   };
 
@@ -57,6 +63,25 @@ function App() {
   };
 
   const renderContent = () => {
+    if (appMode === 'funnel') {
+      switch (activeTab) {
+        case 'home':
+          return <FunnelMarketplace onTabChange={setActiveTab} />;
+        case 'content':
+          return <FunnelBids />;
+        case 'merch':
+          return <FunnelMarketplace onTabChange={setActiveTab} />;
+        case 'cart':
+          return <FunnelBids />;
+        case 'community':
+          return <Community />;
+        case 'profile':
+          return <Profile />;
+        default:
+          return <FunnelMarketplace onTabChange={setActiveTab} />;
+      }
+    }
+
     switch (activeTab) {
       case 'home':
         return <Home onTabChange={setActiveTab} />;
@@ -80,14 +105,37 @@ function App() {
     }
   };
 
+  const getNavLabels = () => {
+    if (appMode === 'funnel') {
+      return [
+        { id: 'home', label: 'Marketplace' },
+        { id: 'content', label: 'My Bids' },
+        { id: 'merch', label: 'Browse' },
+        { id: 'cart', label: 'Watchlist' },
+        { id: 'community', label: 'Community' },
+        { id: 'profile', label: 'Profile' }
+      ];
+    }
+    return [
+      { id: 'home', label: 'Home' },
+      { id: 'content', label: 'Content' },
+      { id: 'merch', label: 'Merch' },
+      { id: 'cart', label: 'Cart' },
+      { id: 'community', label: 'Community' },
+      { id: 'profile', label: 'Profile' }
+    ];
+  };
 
   if (appState === 'code-entry') {
-    return <CodeEntry onCodeValidated={handleCodeValidated} />;
+    return <CodeEntry onCodeValidated={(code) => handleCodeValidated(code)} />;
   }
 
   if (appState === 'login') {
     return <LoginPage onLogin={handleLoginComplete} />;
   }
+
+  const appTitle = appMode === 'funnel' ? 'FUNNEL MARKETPLACE' : 'CASHLESS SOCIETY';
+  const logoSrc = appMode === 'funnel' ? '/CASHLESS_SOCIETY.png' : '/CASHLESS_SOCIETY.png';
 
  return (
   <div className="min-h-screen bg-black flex">
@@ -96,24 +144,21 @@ function App() {
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-8">
           <img 
-            src="/CASHLESS_SOCIETY.png" 
-            alt="Cashless Society Logo" 
+            src={logoSrc}
+            alt={`${appTitle} Logo`}
             className="w-12 h-12 object-contain"
           />
-          <h1 className="text-white text-lg font-cinzel font-semibold tracking-wider leading-tight">
-            CASHLESS<br/>SOCIETY
+          <h1 className="text-white text-lg font-cinzel font-semibold tracking-wider leading-tight text-center">
+            {appMode === 'funnel' ? (
+              <>FUNNEL<br/>MARKETPLACE</>
+            ) : (
+              <>CASHLESS<br/>SOCIETY</>
+            )}
           </h1>
         </div>
         
         <nav className="space-y-2">
-          {[
-            { id: 'home', label: 'Home' },
-            { id: 'content', label: 'Content' },
-            { id: 'merch', label: 'Merch' },
-            { id: 'cart', label: 'Cart' },
-            { id: 'community', label: 'Community' },
-            { id: 'profile', label: 'Profile' }
-          ].map(({ id, label }) => (
+          {getNavLabels().map(({ id, label }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -124,7 +169,7 @@ function App() {
               }`}
             >
               <span className="font-medium">{label}</span>
-              {id === 'cart' && cart.length > 0 && (
+              {id === 'cart' && cart.length > 0 && appMode === 'music' && (
                 <span className="ml-auto bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {cart.reduce((total, item) => total + item.quantity, 0)}
                 </span>
@@ -142,12 +187,12 @@ function App() {
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-3">
             <img 
-              src="/CASHLESS_SOCIETY.png" 
-              alt="Cashless Society Logo" 
+              src={logoSrc}
+              alt={`${appTitle} Logo`}
               className="w-10 h-10 md:w-12 md:h-12 object-contain"
             />
             <h1 className="text-white text-lg md:text-xl font-cinzel font-semibold tracking-wider">
-              CASHLESS SOCIETY
+              {appTitle}
             </h1>
           </div>
           
@@ -165,7 +210,7 @@ function App() {
 
       {/* Bottom Navigation for Mobile */}
       <div className="md:hidden">
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} labels={getNavLabels()} />
       </div>
     </div>
   </div>

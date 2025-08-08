@@ -50,3 +50,29 @@ export interface CartItem {
   quantity: number;
   size?: string;
 }
+
+export interface FunnelListing {
+  id: string;
+  title: string;
+  description: string;
+  category: 'ecommerce' | 'lead-gen' | 'saas' | 'coaching' | 'agency';
+  images: string[];
+  startingBid: number;
+  currentBid: number;
+  highestBidder?: string;
+  bidsCount: number;
+  endTime: Date;
+  isActive: boolean;
+  features: string[];
+  techStack: string[];
+  isNew?: boolean;
+}
+
+export interface Bid {
+  id: string;
+  funnelId: string;
+  bidder: string;
+  amount: number;
+  timestamp: Date;
+  isWinning: boolean;
+}

@@ -4,7 +4,7 @@ import { Input } from "../ui/Input";
 import { Shield } from "lucide-react";
 
 interface CodeEntryProps {
-  onCodeValidated: () => void;
+  onCodeValidated: (code: string) => void;
 }
 
 export const CodeEntry: React.FC<CodeEntryProps> = ({ onCodeValidated }) => {
@@ -20,8 +20,8 @@ export const CodeEntry: React.FC<CodeEntryProps> = ({ onCodeValidated }) => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    if (code === "SOUNDWAVE2024") {
-      onCodeValidated();
+    if (code === "SOUNDWAVE2024" || code === "FUNNELMARKET2024") {
+      onCodeValidated(code);
     } else {
       setError("Invalid code. Please try again.");
     }
@@ -40,7 +40,10 @@ export const CodeEntry: React.FC<CodeEntryProps> = ({ onCodeValidated }) => {
             ENTER SECRET CODE
           </h1>
           <p className="text-gray-400 font-josefin">
-            Access exclusive content with your invitation code
+            Access exclusive content with your invitation code<br/>
+            <span className="text-sm text-gray-500 mt-2 block">
+              Use SOUNDWAVE2024 for music app or FUNNELMARKET2024 for marketplace
+            </span>
           </p>
         </div>
 
@@ -66,7 +69,7 @@ export const CodeEntry: React.FC<CodeEntryProps> = ({ onCodeValidated }) => {
 
         <div className="mt-8 text-center">
           <p className="text-gray-500 text-sm font-josefin">
-            Don't have a code? Contact your artist for access.
+            Don't have a code? Contact the administrator for access.
           </p>
         </div>
       </div>
